@@ -121,7 +121,7 @@ export default function DemoPage() {
 
         {/* Right: 3D Trajectory */}
         <div className="relative">
-          <TrajectoryViewer3D poses={trailPoses} />
+          <TrajectoryViewer3D poses={poses} currentFrame={currentFrame} />
 
           {/* Pose info overlay */}
           {currentPose && (

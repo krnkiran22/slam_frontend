@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Grid, Line, Text, Billboard } from "@react-three/drei";
 import * as THREE from "three";
@@ -9,26 +9,68 @@ import { PoseFrame } from "@/lib/api";
 interface Props {
   poses: PoseFrame[];
   playing?: boolean;
+  currentFrame?: number;
 }
 
-function HeadMarker({ position, rotation, color }: {
+function HumanFigure({ position, rotation, color }: {
   position: [number, number, number];
   rotation: [number, number, number];
   color: string;
 }) {
-  const groupRef = useRef<THREE.Group>(null);
-
   return (
-    <group ref={groupRef} position={position} rotation={rotation}>
-      {/* Head sphere */}
-      <mesh>
-        <sphereGeometry args={[0.06, 16, 16]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
+    <group position={position} rotation={[0, rotation[2], 0]}>
+      {/* Head */}
+      <mesh position={[0, 0.32, 0]}>
+        <sphereGeometry args={[0.045, 16, 16]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} />
       </mesh>
-      {/* Direction arrow (forward) */}
-      <mesh position={[0, 0, -0.12]} rotation={[Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.03, 0.08, 8]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+
+      {/* Neck */}
+      <mesh position={[0, 0.27, 0]}>
+        <cylinderGeometry args={[0.015, 0.015, 0.04, 8]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
+      </mesh>
+
+      {/* Torso */}
+      <mesh position={[0, 0.17, 0]}>
+        <boxGeometry args={[0.1, 0.16, 0.05]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
+      </mesh>
+
+      {/* Left arm */}
+      <mesh position={[-0.07, 0.17, 0]} rotation={[0, 0, 0.15]}>
+        <boxGeometry args={[0.025, 0.14, 0.025]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.15} />
+      </mesh>
+
+      {/* Right arm */}
+      <mesh position={[0.07, 0.17, 0]} rotation={[0, 0, -0.15]}>
+        <boxGeometry args={[0.025, 0.14, 0.025]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.15} />
+      </mesh>
+
+      {/* Left leg */}
+      <mesh position={[-0.025, 0.0, 0]}>
+        <boxGeometry args={[0.03, 0.18, 0.03]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.15} />
+      </mesh>
+
+      {/* Right leg */}
+      <mesh position={[0.025, 0.0, 0]}>
+        <boxGeometry args={[0.03, 0.18, 0.03]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.15} />
+      </mesh>
+
+      {/* Direction indicator (gaze line) */}
+      <mesh position={[0, 0.32, -0.08]} rotation={[Math.PI / 2, 0, 0]}>
+        <coneGeometry args={[0.015, 0.05, 6]} />
+        <meshStandardMaterial color="#22d3ee" emissive="#22d3ee" emissiveIntensity={0.8} />
+      </mesh>
+
+      {/* Glow ring at feet */}
+      <mesh position={[0, -0.09, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.04, 0.06, 24]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.6} transparent opacity={0.5} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
@@ -54,16 +96,28 @@ function TrajectoryPath({ poses }: { poses: PoseFrame[] }) {
     <Line
       points={points}
       vertexColors={colors.map(c => [c.r, c.g, c.b] as [number, number, number])}
-      lineWidth={2}
+      lineWidth={2.5}
     />
   );
 }
 
-function AnimatedHead({ poses, playing }: { poses: PoseFrame[]; playing: boolean }) {
+function AnimatedHuman({ poses, playing, currentFrame }: {
+  poses: PoseFrame[];
+  playing: boolean;
+  currentFrame?: number;
+}) {
   const [frameIdx, setFrameIdx] = useState(0);
   const timeRef = useRef(0);
 
+  useEffect(() => {
+    if (currentFrame !== undefined) {
+      setFrameIdx(currentFrame);
+      timeRef.current = currentFrame;
+    }
+  }, [currentFrame]);
+
   useFrame((_, delta) => {
+    if (currentFrame !== undefined) return;
     if (!playing || poses.length === 0) return;
     timeRef.current += delta * 30;
     const idx = Math.floor(timeRef.current) % poses.length;
@@ -72,7 +126,8 @@ function AnimatedHead({ poses, playing }: { poses: PoseFrame[]; playing: boolean
 
   if (poses.length === 0) return null;
 
-  const pose = poses[frameIdx];
+  const idx = Math.min(frameIdx, poses.length - 1);
+  const pose = poses[idx];
   const pos: [number, number, number] = [
     pose.pose.position.x,
     pose.pose.position.y,
@@ -84,17 +139,17 @@ function AnimatedHead({ poses, playing }: { poses: PoseFrame[]; playing: boolean
     pose.pose.orientation.yaw,
   ];
 
-  const trailStart = Math.max(0, frameIdx - 30);
-  const trailPoses = poses.slice(trailStart, frameIdx + 1);
+  const trailStart = Math.max(0, idx - 40);
+  const trailPoses = poses.slice(trailStart, idx + 1);
   const trailPoints = trailPoses.map(p =>
     new THREE.Vector3(p.pose.position.x, p.pose.position.y, p.pose.position.z)
   );
 
   return (
     <>
-      <HeadMarker position={pos} rotation={rot} color="#22d3ee" />
+      <HumanFigure position={pos} rotation={rot} color="#a78bfa" />
       {trailPoints.length >= 2 && (
-        <Line points={trailPoints} color="#22d3ee" lineWidth={3} opacity={0.6} transparent />
+        <Line points={trailPoints} color="#a78bfa" lineWidth={3} transparent opacity={0.7} />
       )}
     </>
   );
@@ -110,7 +165,7 @@ function AxisLabels() {
   );
 }
 
-function Scene({ poses, playing }: Props) {
+function Scene({ poses, playing, currentFrame }: Props) {
   const center = useMemo(() => {
     if (poses.length === 0) return new THREE.Vector3();
     const avg = poses.reduce(
@@ -131,18 +186,19 @@ function Scene({ poses, playing }: Props) {
 
   return (
     <>
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[5, 5, 5]} intensity={0.8} />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 8, 5]} intensity={0.9} castShadow />
       <pointLight position={[-3, 3, -3]} intensity={0.3} color="#818cf8" />
+      <pointLight position={[3, 1, 3]} intensity={0.2} color="#22d3ee" />
 
       <Grid
-        args={[10, 10]}
+        args={[20, 20]}
         position={[center.x, Math.min(...poses.map(p => p.pose.position.y), 0) - 0.1, center.z]}
         cellSize={0.2}
-        cellColor="#333"
+        cellColor="#2a2a2a"
         sectionSize={1}
-        sectionColor="#555"
-        fadeDistance={8}
+        sectionColor="#444"
+        fadeDistance={12}
         infiniteGrid
       />
 
@@ -150,26 +206,32 @@ function Scene({ poses, playing }: Props) {
       <AxisLabels />
 
       <TrajectoryPath poses={poses} />
-      <AnimatedHead poses={poses} playing={playing ?? false} />
+      <AnimatedHuman poses={poses} playing={playing ?? false} currentFrame={currentFrame} />
 
-      {/* Start marker */}
+      {/* Start marker — green pillar */}
       {poses.length > 0 && (
-        <mesh position={[poses[0].pose.position.x, poses[0].pose.position.y, poses[0].pose.position.z]}>
-          <sphereGeometry args={[0.04, 12, 12]} />
-          <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.8} />
-        </mesh>
+        <group position={[poses[0].pose.position.x, poses[0].pose.position.y, poses[0].pose.position.z]}>
+          <mesh position={[0, -0.05, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.03, 0.06, 24]} />
+            <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={1} side={THREE.DoubleSide} />
+          </mesh>
+          <Billboard position={[0, 0.15, 0]}><Text fontSize={0.05} color="#22c55e">START</Text></Billboard>
+        </group>
       )}
 
-      {/* End marker */}
+      {/* End marker — red pillar */}
       {poses.length > 1 && (
-        <mesh position={[
+        <group position={[
           poses[poses.length - 1].pose.position.x,
           poses[poses.length - 1].pose.position.y,
           poses[poses.length - 1].pose.position.z,
         ]}>
-          <sphereGeometry args={[0.04, 12, 12]} />
-          <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.8} />
-        </mesh>
+          <mesh position={[0, -0.05, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.03, 0.06, 24]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1} side={THREE.DoubleSide} />
+          </mesh>
+          <Billboard position={[0, 0.15, 0]}><Text fontSize={0.05} color="#ef4444">END</Text></Billboard>
+        </group>
       )}
 
       <OrbitControls
@@ -183,44 +245,44 @@ function Scene({ poses, playing }: Props) {
   );
 }
 
-export function TrajectoryViewer3D({ poses, playing = false }: Props) {
+export function TrajectoryViewer3D({ poses, playing = false, currentFrame }: Props) {
   const [isPlaying, setIsPlaying] = useState(playing);
 
   return (
-    <div className="relative w-full" style={{ height: 420 }}>
+    <div className="relative w-full h-full" style={{ minHeight: 420 }}>
       <Canvas
-        camera={{ position: [2, 1.5, 2], fov: 50, near: 0.01, far: 100 }}
-        style={{ background: "hsl(var(--card))" }}
+        camera={{ position: [1.5, 1.2, 1.5], fov: 50, near: 0.01, far: 100 }}
+        style={{ background: "#0a0a0a" }}
       >
-        <Scene poses={poses} playing={isPlaying} />
+        <Scene poses={poses} playing={isPlaying} currentFrame={currentFrame} />
       </Canvas>
 
-      {/* Controls overlay */}
-      <div className="absolute bottom-3 left-3 flex items-center gap-2">
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="px-3 py-1 text-[11px] font-medium bg-background/80 backdrop-blur border border-border hover:bg-secondary transition-colors"
-        >
-          {isPlaying ? "Pause" : "Play"}
-        </button>
-        <span className="text-[11px] text-muted-foreground bg-background/80 backdrop-blur px-2 py-1 border border-border">
-          {poses.length} frames
-        </span>
-      </div>
+      {currentFrame === undefined && (
+        <div className="absolute bottom-3 left-3 flex items-center gap-2">
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="px-3 py-1 text-[11px] font-medium bg-background/80 backdrop-blur border border-border hover:bg-secondary transition-colors"
+          >
+            {isPlaying ? "Pause" : "Play"}
+          </button>
+          <span className="text-[11px] text-muted-foreground bg-background/80 backdrop-blur px-2 py-1 border border-border">
+            {poses.length} frames
+          </span>
+        </div>
+      )}
 
-      {/* Legend */}
-      <div className="absolute top-3 right-3 flex flex-col gap-1 text-[10px] bg-background/80 backdrop-blur px-2.5 py-2 border border-border">
+      <div className="absolute top-3 right-3 flex flex-col gap-1 text-[10px] bg-black/70 backdrop-blur px-2.5 py-2 border border-white/10">
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span className="text-muted-foreground">Start</span>
+          <span className="text-white/60">Start</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-red-500" />
-          <span className="text-muted-foreground">End</span>
+          <span className="text-white/60">End</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-cyan-400" />
-          <span className="text-muted-foreground">Head</span>
+          <div className="w-2 h-2 rounded-full bg-violet-400" />
+          <span className="text-white/60">Person</span>
         </div>
       </div>
     </div>
