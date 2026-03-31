@@ -10,11 +10,122 @@ import {
 import dynamic from "next/dynamic";
 import {
   ArrowLeft, Radio, RotateCcw, AlertCircle, Play, Pause,
-  Box, Eye, Activity, Crosshair,
+  Box, Eye, Activity, Crosshair, Ruler,
 } from "lucide-react";
 import { api, Run, PoseFrame } from "@/lib/api";
 import { RunStatusBadge } from "@/components/RunStatusBadge";
 import { cn, formatDate, formatDuration } from "@/lib/utils";
+
+function metersToFeetInches(m: number): string {
+  const totalInches = m * 39.3701;
+  const feet = Math.floor(totalInches / 12);
+  const inches = Math.round(totalInches % 12);
+  return `${feet}'${inches}"`;
+}
+
+interface HeightEstimate {
+  estimatedHeightM: number;
+  estimatedHeightFtIn: string;
+  numSteps: number;
+  strideLengthM: number;
+  walkingSpeedMs: number;
+  totalDistanceM: number;
+  headBobAmplitudeCm: number;
+  durationS: number;
+  cadenceStepsPerMin: number;
+}
+
+function estimateHeightFromGait(poses: PoseFrame[]): HeightEstimate | null {
+  if (poses.length < 60) return null;
+
+  const y = poses.map(p => p.pose.position.y);
+  const n = y.length;
+
+  // Smooth Y with moving average
+  const winSize = 7;
+  const smoothY = y.map((_, i) => {
+    const start = Math.max(0, i - Math.floor(winSize / 2));
+    const end = Math.min(n, i + Math.ceil(winSize / 2));
+    const slice = y.slice(start, end);
+    return slice.reduce((a, b) => a + b, 0) / slice.length;
+  });
+
+  // Remove linear drift (detrend)
+  const xMean = (n - 1) / 2;
+  const yMean = smoothY.reduce((a, b) => a + b, 0) / n;
+  let num = 0, den = 0;
+  for (let i = 0; i < n; i++) {
+    num += (i - xMean) * (smoothY[i] - yMean);
+    den += (i - xMean) ** 2;
+  }
+  const slope = den > 0 ? num / den : 0;
+  const intercept = yMean - slope * xMean;
+  const detrended = smoothY.map((v, i) => v - (slope * i + intercept));
+
+  // Peak detection on detrended Y (head bob maxima = one step each)
+  const peaks: number[] = [];
+  for (let i = 2; i < n - 2; i++) {
+    if (detrended[i] > detrended[i - 1] && detrended[i] > detrended[i - 2] &&
+        detrended[i] > detrended[i + 1] && detrended[i] > detrended[i + 2]) {
+      peaks.push(i);
+    }
+  }
+
+  // Filter by minimum prominence (ignore noise)
+  const stdDev = Math.sqrt(detrended.reduce((a, v) => a + v * v, 0) / n);
+  const threshold = stdDev * 0.25;
+  const significantPeaks = peaks.filter(i => detrended[i] > threshold);
+
+  // Merge peaks that are too close (within 5 frames ≈ 0.17s)
+  const mergedPeaks: number[] = [];
+  for (const p of significantPeaks) {
+    if (mergedPeaks.length === 0 || p - mergedPeaks[mergedPeaks.length - 1] > 5) {
+      mergedPeaks.push(p);
+    } else if (detrended[p] > detrended[mergedPeaks[mergedPeaks.length - 1]]) {
+      mergedPeaks[mergedPeaks.length - 1] = p;
+    }
+  }
+
+  const numSteps = mergedPeaks.length;
+  if (numSteps < 3) return null;
+
+  // Total horizontal distance (X-Z plane)
+  let totalDist = 0;
+  for (let i = 1; i < poses.length; i++) {
+    const dx = poses[i].pose.position.x - poses[i - 1].pose.position.x;
+    const dz = poses[i].pose.position.z - poses[i - 1].pose.position.z;
+    totalDist += Math.sqrt(dx * dx + dz * dz);
+  }
+
+  // Stride length: one full stride = 2 steps (left foot + right foot)
+  const numStrides = numSteps / 2;
+  const strideLength = numStrides > 0 ? totalDist / numStrides : 0;
+
+  // Height from stride: comfortable walk ratio ≈ 0.415
+  // stride_length / height ≈ 0.415 (biomechanical constant)
+  const estimatedHeight = strideLength / 0.415;
+
+  const duration = poses[poses.length - 1].timestamp_s - poses[0].timestamp_s;
+  const walkingSpeed = duration > 0 ? totalDist / duration : 0;
+  const cadence = duration > 0 ? (numSteps / duration) * 60 : 0;
+
+  // Average head bob amplitude
+  const bobAmplitude = mergedPeaks.length > 0
+    ? mergedPeaks.reduce((a, i) => a + Math.abs(detrended[i]), 0) / mergedPeaks.length
+    : 0;
+
+  return {
+    estimatedHeightM: estimatedHeight,
+    estimatedHeightFtIn: metersToFeetInches(estimatedHeight),
+    numSteps,
+    strideLengthM: strideLength,
+    walkingSpeedMs: walkingSpeed,
+    totalDistanceM: totalDist,
+    headBobAmplitudeCm: bobAmplitude * 100,
+    durationS: duration,
+    cadenceStepsPerMin: cadence,
+  };
+}
 
 const TrajectoryViewer3D = dynamic(
   () => import("@/components/TrajectoryViewer3D").then(m => ({ default: m.TrajectoryViewer3D })),
@@ -98,6 +209,8 @@ export default function RunDetailPage() {
     pitch: +(f.pose.orientation.pitch * 180 / Math.PI).toFixed(2),
     yaw: +(f.pose.orientation.yaw * 180 / Math.PI).toFixed(2),
   })), [poses]);
+
+  const heightEstimate = useMemo(() => estimateHeightFromGait(poses), [poses]);
 
   const objectSummary = useMemo(() => {
     const counts: Record<string, { count: number; avgConf: number }> = {};
@@ -302,6 +415,69 @@ export default function RunDetailPage() {
               </div>
             ))}
           </div>
+
+          {/* Height Estimation / Biomechanical Analysis */}
+          {heightEstimate && (
+            <div className="bg-card border border-border rounded-sm">
+              <div className="px-5 py-3.5 border-b border-border">
+                <h2 className="text-[13px] font-semibold flex items-center gap-2">
+                  <Ruler size={14} className="text-violet-400" />
+                  Biomechanical Analysis — Height Estimation
+                </h2>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Estimated from gait analysis: stride length / 0.415 (biomechanical walking constant)
+                </p>
+              </div>
+              <div className="p-5 space-y-4">
+                {/* Big height display */}
+                <div className="flex items-center gap-6">
+                  <div className="bg-violet-500/10 border border-violet-500/20 rounded-sm px-6 py-4 text-center">
+                    <p className="text-[10px] font-medium uppercase tracking-widest text-violet-400 mb-1">Estimated Height</p>
+                    <p className="text-3xl font-bold font-mono text-violet-400">{heightEstimate.estimatedHeightM.toFixed(2)}<span className="text-lg ml-1">m</span></p>
+                    <p className="text-[13px] font-mono text-violet-300 mt-1">{heightEstimate.estimatedHeightFtIn}</p>
+                  </div>
+                  <div className="flex-1 space-y-1 text-[12px]">
+                    <p className="text-muted-foreground">
+                      This height is computed from your <strong className="text-foreground">walking gait pattern</strong>.
+                      During walking, your head bobs up and down with each step.
+                      The VIO tracks this oscillation and measures how far you travel per stride.
+                    </p>
+                    <p className="text-muted-foreground">
+                      The ratio <code className="text-[11px] bg-secondary px-1.5 py-0.5 rounded font-mono">stride_length / height ≈ 0.415</code> is a
+                      well-established biomechanical constant for comfortable walking speed.
+                      If this matches your real height, it proves the VIO position data is metrically accurate.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Gait metrics grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { label: "Steps Detected", value: String(heightEstimate.numSteps), unit: "steps" },
+                    { label: "Stride Length", value: heightEstimate.strideLengthM.toFixed(2), unit: "m" },
+                    { label: "Total Distance", value: heightEstimate.totalDistanceM.toFixed(2), unit: "m" },
+                    { label: "Walking Speed", value: heightEstimate.walkingSpeedMs.toFixed(2), unit: "m/s" },
+                    { label: "Cadence", value: heightEstimate.cadenceStepsPerMin.toFixed(0), unit: "steps/min" },
+                    { label: "Head Bob", value: heightEstimate.headBobAmplitudeCm.toFixed(1), unit: "cm" },
+                    { label: "Duration", value: heightEstimate.durationS.toFixed(1), unit: "s" },
+                    { label: "Avg Step Length", value: (heightEstimate.strideLengthM / 2).toFixed(2), unit: "m" },
+                  ].map(m => (
+                    <div key={m.label} className="bg-secondary/30 border border-border rounded-sm px-3 py-2">
+                      <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">{m.label}</p>
+                      <p className="text-[14px] font-mono text-foreground mt-0.5">{m.value} <span className="text-[10px] text-muted-foreground">{m.unit}</span></p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Validation note */}
+                <div className="bg-secondary/20 border border-border rounded-sm px-4 py-3 text-[12px] text-muted-foreground">
+                  <strong className="text-foreground">How to validate:</strong> Compare the estimated height above with your actual height.
+                  Normal walking cadence is 100–130 steps/min, stride length ~1.2–1.6m, speed ~1.2–1.5 m/s.
+                  If these metrics are in range, the VIO is producing metrically accurate real-world measurements.
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* X Y Z Position Chart */}
           <div className="bg-card border border-border rounded-sm">
