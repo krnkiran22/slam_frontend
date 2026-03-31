@@ -7,10 +7,16 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
 } from "recharts";
-import { ArrowLeft, Radio, RotateCcw, AlertCircle } from "lucide-react";
+import dynamic from "next/dynamic";
+import { ArrowLeft, Radio, RotateCcw, AlertCircle, Box } from "lucide-react";
 import { api, Run, PoseFrame } from "@/lib/api";
 import { RunStatusBadge } from "@/components/RunStatusBadge";
 import { cn, formatDate, formatDuration } from "@/lib/utils";
+
+const TrajectoryViewer3D = dynamic(
+  () => import("@/components/TrajectoryViewer3D").then(m => ({ default: m.TrajectoryViewer3D })),
+  { ssr: false, loading: () => <div className="h-[420px] flex items-center justify-center text-muted-foreground text-[13px]">Loading 3D viewer…</div> }
+);
 
 export default function RunDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -211,6 +217,24 @@ export default function RunDetailPage() {
           )}
         </div>
       </div>
+
+      {/* 3D Trajectory Viewer */}
+      {poses.length > 0 && (
+        <div className="bg-card border border-border rounded-sm animate-slide-up animate-fade-in-2">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+            <div>
+              <h2 className="text-[13px] font-semibold flex items-center gap-2">
+                <Box size={14} />
+                3D Head Trajectory
+              </h2>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Click &amp; drag to rotate · Scroll to zoom · Right-click to pan
+              </p>
+            </div>
+          </div>
+          <TrajectoryViewer3D poses={poses} />
+        </div>
+      )}
 
       {/* Object Detections */}
       {poses.length > 0 && (
