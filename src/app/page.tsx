@@ -74,7 +74,7 @@ export default function RunsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Pipeline Runs</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            VIO + Scene Perception — Build Gen 4
+            VIO + Scene Perception — Build Gen 4 — GPU Connected
           </p>
         </div>
         <div className="flex items-center gap-2">

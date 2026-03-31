@@ -65,6 +65,18 @@ export const api = {
       body: JSON.stringify({ video_path, imu_path }),
     }),
 
+  uploadRun: async (video: File, imu: File): Promise<Run> => {
+    const form = new FormData();
+    form.append("video", video);
+    form.append("imu", imu);
+    const res = await fetch(`${BASE}/api/runs/upload`, {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    return res.json();
+  },
+
   getPoses: (id: string, skip = 0, limit = 200) =>
     req<PosesResponse>(`/api/runs/${id}/poses?skip=${skip}&limit=${limit}`),
 
