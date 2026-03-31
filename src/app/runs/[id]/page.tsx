@@ -98,15 +98,26 @@ export default function RunDetailPage() {
             </p>
           </div>
 
-          {(run.status === "processing" || run.status === "pending") && (
-            <Link
-              href={`/runs/${id}/live`}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium border border-border rounded-md hover:bg-secondary transition-colors"
-            >
-              <Radio size={13} className="text-blue-500 animate-pulse-dot" />
-              Live view
-            </Link>
-          )}
+          <div className="flex items-center gap-2">
+            {run.status === "done" && (
+              <Link
+                href={`/runs/${id}/demo`}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium bg-foreground text-background hover:opacity-90 transition-opacity"
+              >
+                <Box size={13} />
+                3D Demo
+              </Link>
+            )}
+            {(run.status === "processing" || run.status === "pending") && (
+              <Link
+                href={`/runs/${id}/live`}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium border border-border rounded-md hover:bg-secondary transition-colors"
+              >
+                <Radio size={13} className="text-blue-500 animate-pulse-dot" />
+                Live view
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 

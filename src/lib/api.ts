@@ -83,6 +83,8 @@ export const api = {
   deleteRun: (id: string) =>
     fetch(`${BASE}/api/runs/${id}`, { method: "DELETE" }),
 
+  videoUrl: (id: string) => `${BASE}/api/runs/${id}/video`,
+
   wsUrl: (id: string) =>
     `${BASE.replace(/^http/, "ws")}/ws/runs/${id}`,
 };
