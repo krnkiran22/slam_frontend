@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   DESIGN SYSTEM — Build AI VIO Dashboard
+   Matches the Build AI product design language
+   ============================================ */
+
+@layer base {
+  :root {
+    --background: 0 0% 99%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 210 10% 92%;
+    --secondary-foreground: 210 10% 20%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;
+
+    /* Semantic status */
+    --success: 142 52% 42%;
+    --success-fg: 142 30% 20%;
+    --success-muted: 142 30% 95%;
+    --warning: 38 92% 50%;
+    --warning-fg: 38 60% 25%;
+    --warning-muted: 38 60% 95%;
+    --error: 0 72% 51%;
+    --error-fg: 0 50% 25%;
+    --error-muted: 0 50% 95%;
+    --info: 217 91% 60%;
+    --info-fg: 217 60% 25%;
+    --info-muted: 217 60% 95%;
+  }
+
+  .dark {
+    --background: 224 18% 7%;
+    --foreground: 0 0% 95%;
+    --card: 224 14% 12%;
+    --card-foreground: 0 0% 95%;
+    --popover: 224 14% 14%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 95%;
+    --primary-foreground: 224 18% 7%;
+    --secondary: 224 10% 17%;
+    --secondary-foreground: 224 5% 90%;
+    --muted: 224 14% 14%;
+    --muted-foreground: 0 0% 72%;
+    --accent: 224 10% 17%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 72% 62%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 224 10% 22%;
+    --input: 224 10% 24%;
+    --ring: 0 0% 95%;
+
+    --success: 142 52% 48%;
+    --success-fg: 142 40% 85%;
+    --success-muted: 142 30% 12%;
+    --warning: 38 85% 55%;
+    --warning-fg: 38 60% 88%;
+    --warning-muted: 38 40% 12%;
+    --error: 0 72% 55%;
+    --error-fg: 0 50% 88%;
+    --error-muted: 0 40% 12%;
+    --info: 217 80% 60%;
+    --info-fg: 217 50% 88%;
+    --info-muted: 217 40% 12%;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), "Avenir Next", "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .status-done {
+    background-color: hsl(var(--success-muted));
+    color: hsl(var(--success-fg));
+    border-color: hsl(var(--success) / 0.4);
+  }
+  .status-processing {
+    background-color: hsl(var(--info-muted));
+    color: hsl(var(--info-fg));
+    border-color: hsl(var(--info) / 0.4);
+  }
+  .status-pending {
+    background-color: hsl(var(--warning-muted));
+    color: hsl(var(--warning-fg));
+    border-color: hsl(var(--warning) / 0.4);
+  }
+  .status-failed {
+    background-color: hsl(var(--error-muted));
+    color: hsl(var(--error-fg));
+    border-color: hsl(var(--error) / 0.4);
+  }
+
+  .interactive-row {
+    @apply transition-all duration-150 ease-out;
+    @apply hover:bg-secondary/50;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.35s ease-out backwards;
+  }
+  .animate-fade-in-1 { animation-delay: 50ms; }
+  .animate-fade-in-2 { animation-delay: 100ms; }
+  .animate-fade-in-3 { animation-delay: 150ms; }
+  .animate-fade-in-4 { animation-delay: 200ms; }
+
+  .animate-slide-up {
+    animation: slideUp 0.35s ease-out backwards;
+  }
+
+  .animate-pulse-dot {
+    animation: pulseDot 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--secondary)) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
