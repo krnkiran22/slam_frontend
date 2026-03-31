@@ -80,14 +80,14 @@ export default function RunsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={load}
-            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             aria-label="Refresh"
           >
             <RefreshCw size={14} className={cn(loading && "animate-spin")} />
           </button>
           <button
             onClick={() => setShowNewRun(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium bg-foreground text-background rounded-md hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium bg-foreground text-background hover:opacity-90 transition-opacity"
           >
             <Plus size={13} />
             New Run
@@ -98,14 +98,14 @@ export default function RunsPage() {
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 animate-fade-in animate-fade-in-1">
         {[
-          { label: "Total", value: total, cls: "" },
-          { label: "Done", value: stats.done, cls: "text-green-600 dark:text-green-400" },
-          { label: "Processing", value: stats.processing, cls: "text-blue-600 dark:text-blue-400" },
-          { label: "Failed", value: stats.failed, cls: "text-red-600 dark:text-red-400" },
+          { label: "Total", value: total, color: "var(--foreground)" },
+          { label: "Done", value: stats.done, color: "var(--success)" },
+          { label: "Processing", value: stats.processing, color: "var(--info)" },
+          { label: "Failed", value: stats.failed, color: "var(--error)" },
         ].map(s => (
-          <div key={s.label} className="bg-card border border-border rounded-sm p-4">
+          <div key={s.label} className="bg-card border border-border p-4">
             <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">{s.label}</p>
-            <p className={cn("text-2xl font-semibold tracking-tight mt-1 font-mono", s.cls)}>{s.value}</p>
+            <p className="text-2xl font-semibold tracking-tight mt-1 font-mono" style={{ color: s.color }}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -147,7 +147,7 @@ export default function RunsPage() {
             <p className="text-[13px] text-muted-foreground mt-1">Create a new run to start processing</p>
             <button
               onClick={() => setShowNewRun(true)}
-              className="mt-4 flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium bg-foreground text-background rounded-md hover:opacity-90 transition-opacity"
+              className="mt-4 flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium bg-foreground text-background hover:opacity-90 transition-opacity"
             >
               <Plus size={13} /> New Run
             </button>
@@ -185,8 +185,8 @@ export default function RunsPage() {
                     <div className="mt-1.5 pl-5">
                       <div className="h-0.5 bg-border rounded-full w-48 max-w-full overflow-hidden">
                         <div
-                          className="h-full bg-blue-500 transition-all duration-500"
-                          style={{ width: `${run.progress ?? 0}%` }}
+                          style={{ backgroundColor: "var(--info)", width: `${run.progress ?? 0}%` }}
+                          className="h-full transition-all duration-500"
                         />
                       </div>
                     </div>

@@ -38,7 +38,7 @@ export function NewRunModal({ open, onClose, onCreated }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 bg-card border border-border rounded-sm shadow-xl w-full max-w-md animate-slide-up">
+      <div className="relative z-10 bg-card border border-border shadow-2xl w-full max-w-md animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h2 className="text-[15px] font-semibold">New Pipeline Run</h2>
@@ -57,7 +57,7 @@ export function NewRunModal({ open, onClose, onCreated }: Props) {
               value={videoPath}
               onChange={e => setVideoPath(e.target.value)}
               placeholder="/mnt/pendrive/video.mp4"
-              className="w-full bg-background border border-border rounded-sm px-3 py-2 text-[13px] font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition"
+              className="w-full bg-background border border-input px-3 py-2 text-[13px] font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition"
             />
           </div>
 
@@ -70,12 +70,16 @@ export function NewRunModal({ open, onClose, onCreated }: Props) {
               value={imuPath}
               onChange={e => setImuPath(e.target.value)}
               placeholder="/mnt/pendrive/imu.csv"
-              className="w-full bg-background border border-border rounded-sm px-3 py-2 text-[13px] font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition"
+              className="w-full bg-background border border-input px-3 py-2 text-[13px] font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition"
             />
           </div>
 
           {error && (
-            <p className="text-[12px] text-destructive bg-destructive/10 border border-destructive/20 rounded-sm px-3 py-2">
+            <p className="text-[12px] px-3 py-2 border" style={{
+              color: "var(--error-foreground)",
+              backgroundColor: "var(--error-muted)",
+              borderColor: "color-mix(in srgb, var(--error) 30%, transparent)",
+            }}>
               {error}
             </p>
           )}
@@ -87,7 +91,7 @@ export function NewRunModal({ open, onClose, onCreated }: Props) {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium bg-foreground text-background rounded-md hover:opacity-90 disabled:opacity-50 transition-opacity"
+              className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium bg-foreground text-background hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               <Play size={12} />
               {loading ? "Starting…" : "Start Run"}

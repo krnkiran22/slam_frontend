@@ -17,7 +17,7 @@ export function RunStatusBadge({ status, showDot = false }: Props) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[11px] font-medium border",
+        "inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium",
         `status-${status}`
       )}
     >

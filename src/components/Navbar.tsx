@@ -24,7 +24,7 @@ export function Navbar() {
         <div className="flex items-center h-14">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 mr-8 group">
-            <div className="w-6 h-6 rounded-sm bg-foreground flex items-center justify-center">
+            <div className="w-6 h-6 bg-foreground flex items-center justify-center">
               <Activity size={13} className="text-background" />
             </div>
             <span className="text-[15px] font-semibold tracking-tight text-foreground">
@@ -57,12 +57,12 @@ export function Navbar() {
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
             </button>
-            <span className="text-[11px] font-mono text-muted-foreground border border-border rounded px-2 py-0.5">
+            <span className="text-[11px] font-mono text-muted-foreground border border-border px-2 py-0.5">
               Gen 4
             </span>
           </div>

@@ -3,90 +3,103 @@
 @tailwind utilities;
 
 /* ============================================
-   DESIGN SYSTEM — Build AI VIO Dashboard
-   Matches the Build AI product design language
+   BUILD AI — Exact theme from data.build.ai
    ============================================ */
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 210 10% 92%;
-    --secondary-foreground: 210 10% 20%;
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 42%;
-    --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 9%;
+    --radius: 0;
 
-    /* Semantic status */
-    --success: 142 52% 42%;
-    --success-fg: 142 30% 20%;
-    --success-muted: 142 30% 95%;
-    --warning: 38 92% 50%;
-    --warning-fg: 38 60% 25%;
-    --warning-muted: 38 60% 95%;
-    --error: 0 72% 51%;
-    --error-fg: 0 50% 25%;
-    --error-muted: 0 50% 95%;
-    --info: 217 91% 60%;
-    --info-fg: 217 60% 25%;
-    --info-muted: 217 60% 95%;
+    --background: #fcfcfc;
+    --foreground: #0b0b0b;
+    --card: #fff;
+    --card-foreground: #0b0b0b;
+    --popover: #fff;
+    --popover-foreground: #0b0b0b;
+    --primary: #0b0b0b;
+    --primary-foreground: #f8f8f8;
+    --secondary: #dde6e8;
+    --secondary-foreground: #151c1d;
+    --muted: #eeeeee;
+    --muted-foreground: #555555;
+    --accent: #ebebeb;
+    --accent-foreground: #0b0b0b;
+    --destructive: #df2225;
+    --destructive-foreground: #fff6f5;
+    --border: #dedede;
+    --input: #dedede;
+    --ring: #0b0b0b;
+
+    --success: #189a30;
+    --success-foreground: #112812;
+    --success-muted: #e6f8e6;
+    --warning: #d38e00;
+    --warning-foreground: #513400;
+    --warning-muted: #feefdc;
+    --error: #de4e4b;
+    --error-foreground: #4f1a18;
+    --error-muted: #ffecea;
+    --info: #0089cb;
+    --info-foreground: #002c47;
+    --info-muted: #e5f4ff;
+
+    --chart-1: #2e2e2e;
+    --chart-2: #4aa651;
+    --chart-3: #d38e00;
+    --chart-4: #de4e4b;
+    --chart-5: #5872d2;
   }
 
   .dark {
-    --background: 224 18% 7%;
-    --foreground: 0 0% 95%;
-    --card: 224 14% 12%;
-    --card-foreground: 0 0% 95%;
-    --popover: 224 14% 14%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 0 0% 95%;
-    --primary-foreground: 224 18% 7%;
-    --secondary: 224 10% 17%;
-    --secondary-foreground: 224 5% 90%;
-    --muted: 224 14% 14%;
-    --muted-foreground: 0 0% 72%;
-    --accent: 224 10% 17%;
-    --accent-foreground: 0 0% 95%;
-    --destructive: 0 72% 62%;
-    --destructive-foreground: 0 0% 95%;
-    --border: 224 10% 22%;
-    --input: 224 10% 24%;
-    --ring: 0 0% 95%;
+    --background: #010101;
+    --foreground: #eeeeee;
+    --card: #050607;
+    --card-foreground: #eeeeee;
+    --popover: #08090b;
+    --popover-foreground: #eeeeee;
+    --primary: #eeeeee;
+    --primary-foreground: #010102;
+    --secondary: #0d1014;
+    --secondary-foreground: #dcdee1;
+    --muted: #08090b;
+    --muted-foreground: #a4a4a4;
+    --accent: #0d1013;
+    --accent-foreground: #eeeeee;
+    --destructive: #f94144;
+    --destructive-foreground: #f5eceb;
+    --border: #1d1f23;
+    --input: #222428;
+    --ring: #eeeeee;
 
-    --success: 142 52% 48%;
-    --success-fg: 142 40% 85%;
-    --success-muted: 142 30% 12%;
-    --warning: 38 85% 55%;
-    --warning-fg: 38 60% 88%;
-    --warning-muted: 38 40% 12%;
-    --error: 0 72% 55%;
-    --error-fg: 0 50% 88%;
-    --error-muted: 0 40% 12%;
-    --info: 217 80% 60%;
-    --info-fg: 217 50% 88%;
-    --info-muted: 217 40% 12%;
+    --success: #4cc157;
+    --success-foreground: #b7e6b7;
+    --success-muted: #040e04;
+    --warning: #f9ad26;
+    --warning-foreground: #fed7a3;
+    --warning-muted: #120900;
+    --error: #ff716b;
+    --error-foreground: #ffcfca;
+    --error-muted: #160605;
+    --info: #02a9f7;
+    --info-foreground: #bde4ff;
+    --info-muted: #010d16;
+
+    --chart-1: #cecece;
+    --chart-2: #4cc157;
+    --chart-3: #f9ad26;
+    --chart-4: #ff716b;
+    --chart-5: #7997ff;
   }
 
   * {
-    @apply border-border;
     box-sizing: border-box;
+    border-color: var(--border);
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-inter), "Avenir Next", "Segoe UI", sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-inter), "Inter", "Avenir Next", "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -103,42 +116,60 @@
 }
 
 @layer utilities {
+  /* Status badges — exact Build AI tokens */
   .status-done {
-    background-color: hsl(var(--success-muted));
-    color: hsl(var(--success-fg));
-    border-color: hsl(var(--success) / 0.4);
+    background-color: var(--success-muted);
+    color: var(--success-foreground);
+    border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+  }
+  .dark .status-done {
+    color: var(--success-foreground);
   }
   .status-processing {
-    background-color: hsl(var(--info-muted));
-    color: hsl(var(--info-fg));
-    border-color: hsl(var(--info) / 0.4);
+    background-color: var(--info-muted);
+    color: var(--info-foreground);
+    border: 1px solid color-mix(in srgb, var(--info) 30%, transparent);
+  }
+  .dark .status-processing {
+    color: var(--info-foreground);
   }
   .status-pending {
-    background-color: hsl(var(--warning-muted));
-    color: hsl(var(--warning-fg));
-    border-color: hsl(var(--warning) / 0.4);
+    background-color: var(--warning-muted);
+    color: var(--warning-foreground);
+    border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
+  }
+  .dark .status-pending {
+    color: var(--warning-foreground);
   }
   .status-failed {
-    background-color: hsl(var(--error-muted));
-    color: hsl(var(--error-fg));
-    border-color: hsl(var(--error) / 0.4);
+    background-color: var(--error-muted);
+    color: var(--error-foreground);
+    border: 1px solid color-mix(in srgb, var(--error) 30%, transparent);
+  }
+  .dark .status-failed {
+    color: var(--error-foreground);
   }
 
   .interactive-row {
-    @apply transition-all duration-150 ease-out;
-    @apply hover:bg-secondary/50;
+    transition: background-color 150ms ease;
+  }
+  .interactive-row:hover {
+    background-color: var(--secondary);
+  }
+  .dark .interactive-row:hover {
+    background-color: var(--secondary);
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.35s ease-out backwards;
+    animation: fadeIn 0.3s ease-out backwards;
   }
-  .animate-fade-in-1 { animation-delay: 50ms; }
-  .animate-fade-in-2 { animation-delay: 100ms; }
-  .animate-fade-in-3 { animation-delay: 150ms; }
-  .animate-fade-in-4 { animation-delay: 200ms; }
+  .animate-fade-in-1 { animation-delay: 40ms; }
+  .animate-fade-in-2 { animation-delay: 80ms; }
+  .animate-fade-in-3 { animation-delay: 120ms; }
+  .animate-fade-in-4 { animation-delay: 160ms; }
 
   .animate-slide-up {
-    animation: slideUp 0.35s ease-out backwards;
+    animation: slideUp 0.3s ease-out backwards;
   }
 
   .animate-pulse-dot {
@@ -150,17 +181,14 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes pulseDot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
+  50% { opacity: 0.5; transform: scale(0.75); }
 }
-
 @keyframes shimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }
@@ -169,10 +197,11 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    hsl(var(--muted)) 25%,
-    hsl(var(--secondary)) 50%,
-    hsl(var(--muted)) 75%
+    var(--muted) 25%,
+    var(--secondary) 50%,
+    var(--muted) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 2px;
 }
